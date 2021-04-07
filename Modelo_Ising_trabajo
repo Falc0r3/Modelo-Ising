@@ -1,3 +1,7 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
 #define L 10
 #define V 100
 #define NormRANu (2.3283063671E-10F)
