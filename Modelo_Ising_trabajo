@@ -22,14 +22,14 @@ char spin[V];//como no estaba declarado de antes lo he llamado asi
 main()
 {
 double beta_inicial, beta_final, delta_beta;
-int N_Ter, N_Med, N_Met, tipo_semilla;
+int N_Ter, N_med, N_Met, tipo_semilla;
 int xp[L];
 int xm[L];
 int yp[L];
 int ym[L];
 
 inicializo_direcciones(xp, yp, xm, ym, L); 
-lee_input(beta_inicial, beta_final, delta_beta, N_Ter, N_Med, N_Met, tipo_semilla); 
+lee_input(beta_inicial, beta_final, delta_beta, N_Ter, N_med, N_Met, tipo_semilla); 
 ini_ran(123456789); //la semilla hay que cambiarla en algun punto, pero como no sé poner el tiempo del sistema pues aun no tengo la funcion
 Genera_configuracion_Inicial(spin,V,L); 
 
@@ -40,7 +40,7 @@ for(sentido=0;sentido<2;sentido++)
   for(N_betas=0;N_betas<N_pasos;N_beta++)
   {
     Calcula_prob(beta); //Calculamos la tabla de probabilidad para la nueva beta
-    for(N_Met=0;N_Met<N_Ter;N_Met++) //Proceso de termallizacion
+    for(N_Met=0;N_Met<N_Ter;N_Met++) //Proceso de termallizacion (este indice no está mal?, quiero decir, entonces para que cojo el valor de N_Met, y además, estaría haciendo metropolis tantas veces como veces termalizo cosa la cual no le veo el sentido
       Metropolis();
     Inicia_Vector_Medidas(N_med); //Pon a cero los acumuladores
     for(N_m=0;N_m<N_med;N_m++) //bucle en medidas
@@ -94,7 +94,7 @@ char leer_flag(void){ //lee el tipo de configuracion que queremos tener
         exit(2);
     }
     else {
-        fscanf(flag,"%d",x);
+        fscanf(flag,"%d",&x); //revisar si he hecho bien en pasar puntero
         fclose(flag);
     }
     return x;
@@ -131,7 +131,7 @@ void Genera_configuracion_Inicial(char *s, int V0, int L0){ //crea la configurac
         }
         else {
             for(i=0;i<V0;i++)
-                fscanf(fconfig,"%d",s[i]);
+                fscanf(fconfig,"%c",&s[i]);
         }
         fclose(fconfig);
         break;
@@ -151,7 +151,7 @@ void lee_input (double beta_0, double beta_f, double dbeta, int N_Ter, int N_med
         exit(1);
     }
     else{
-        fscanf(f_in,"%lf %lf %lf %d %d %d %d",beta_0,beta_f,dbeta,N_Ter, N_med, N_met, semillarapuano);
+        fscanf(f_in,"%lf %lf %lf %d %d %d %d",&beta_0,&beta_f,&dbeta,&N_Ter, &N_med, &N_met, &semillarapuano); // de nuevo revisar si hice bien en pasar punteros (diría que sí)
     }
 }
 
