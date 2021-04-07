@@ -1,3 +1,15 @@
+#define L 10
+#define V 100
+#define NormRANu (2.3283063671E-10F)
+
+unsigned irr[256];
+unsigned char ind_ran,ig1,ig2,ig3;
+void ini_ran(int SEMILLA);
+void Random(void);
+
+char leer_flag(void);
+void Genera_configuracion_Inicial(char *s, int V0, int L0);
+
 main()
 {
 lee_input(); //Lee beta_inicial, beta_final,delta_beta,N_Ter,N_med,N_Met
@@ -16,7 +28,7 @@ for(sentido=0;sentido<2;sentido++)
     for(N_m=0;N_m<N_med;N_m++) //bucle en medidas
     {
       for(N_M=0;N_M<N_Met;N_M++) //Iteraciones de Monte Carlo
-      Metropolis();
+        Metropolis();
       Medidas(); //Mido
       Construir_Vector_Medidas(N_m); //Guarda resultados en un vector
     }
@@ -27,4 +39,89 @@ for(sentido=0;sentido<2;sentido++)
   }
 delta_beta=-delta_beta
 }
+}
+
+void ini_ran(int SEMILLA){
+  int INI, FACTOR, SUM,i;
+  srand(SEMILLA);
+  INI=SEMILLA;
+  FACTOR=67397;
+  SUM=7364893;
+  for(i=0;i<256;i++){
+    INI=(INI*FACTOR+SUM);
+    irr[i]=INI;
+  }
+  ind_ran=ig1=ig2=ig3=0;
+}
+
+float Random(void){
+  float r;
+  ig1=ind_ran-24;
+  ig2=ind_ran-55;
+  ig3=ind_ran-61;
+  irr[ind_ran]=irr[ig1]+irr[ig2];
+  ir1=(irr[ind_ran]^irr[ig3]);
+  ind_ran++;
+  r=ir1*NormRANu;
+  #ifdef DEBUG
+    printf("%lf",r);
+  #endif DEBUG
+  return r;
+}
+char leer_flag(void){ //lee el tipo de configuracion que queremos tener
+    char x;
+    FILE *flag;
+    if ((flag=fopen("bandera.txt","wt"))==NULL){
+        printf("el archivo que lee bandera no existe o no se puede abrir");
+        exit(2);
+    }
+    else {
+        fscanf(flag,"%d",x);
+        fclose(flag);
+    }
+    return x;
+}
+
+void Genera_configuracion_Inicial(char *s, int V0, int L0){ //crea la configuracion inicial
+    int i,j;
+    char bandera;
+    bandera=leer_flag();
+    FILE *fconfig;
+    switch(bandera){
+    case 0: // crea una distribucion random (¿debería implementar parisi-rapuano?)
+        for(i=0;i<V0;i++){
+            if((rand()/((double)RAND_MAX+1))<0.5)
+                s[i]=1;
+            else
+                s[i]=-1;
+        }
+        break;
+    case 1: //crea una distribucion uniforme (todo -1 o 1)  ¿debería de poner una opcion distinta o con lo que he hecho del random basta?
+        if((rand()/((double)RAND_MAX+1))<0.5){
+            for(i=0;i<V0;i++)
+                s[i]=1;
+        }
+        else{
+            for(i=0;i<V0;i++)
+                s[i]=-1;
+        }
+        break;
+    case 2: // lee la configuracion de un ficheiro de texto ¿debería ser binario?
+        if((fconfig=fopen("configuracion.txt","rt"))==NULL){
+            printf("No existe o no se puede abrir el archivo de la configuracion inicial");
+            exit(3);
+        }
+        else {
+            for(i=0;i<V0;i++)
+                fscanf(fconfig,"%d",s[i]);
+        }
+        fclose(fconfig);
+        break;
+    case 3: // esta será la que la crea en ajedrez
+        for(j=0;j<L0;j++)
+            for(i=0;i<L0;i++){
+                s[i+(L0*j)]=pow(-1,i+j);
+            }
+        break;
+    }
 }
